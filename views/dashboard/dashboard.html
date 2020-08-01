@@ -512,6 +512,11 @@
               <label for="productcost">Product Price</label>
               <input type="number" class="form-control" id="productcost" aria-describedby="productcost" placeholder="Enter product price">
             </div>
+                        <div class="form-group">
+              <label for="barcodes">Number of Barcodes </label>
+              <input type="number" class="form-control" id="barcodes" placeholder="barcodes">
+            </div>
+
             <div class="form-group">
               <label for="mfg">Manufacturer's Date <strong>(MFG)</strong></label>
               <input type="date" class="form-control" id="mfg" placeholder="MFG">
@@ -520,6 +525,39 @@
               <label for="exp">Expiry Date <strong>(EXP)</strong></label>
               <input type="date" class="form-control" id="exp" placeholder="exp">
             </div>
+                                      <div class="radio-group" >
+                                        <input type='radio' value="credit" class=""><img src="https://i.imgur.com/XzOzVHZ.jpg" width="200px" height="100px"/>
+                                        <input type='radio'  class=""value="paypal" class="form-control"><img src="https://i.imgur.com/jXjwZlj.jpg" width="200px" height="100px">
+                                    </div> 
+                                    <div class="form-group">
+                                      <label>Card Holder Name*</label>
+                                      <input type="text" name="holdername" class="form-control" placeholder="" />
+                                    </div>
+                                     
+                                    <div class="form-group">
+                                        <div class="col-9"> <label>Card Number*</label> <input type="text" class="form-control" name="cardno" placeholder="" /> </div>
+                                        <div class="col-3"> <label>CVC*</label> <input type="password" class="form-control" name="cvcpwd" placeholder="***" /> </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-3"> <label class="pay">Expiry Date*</label> </div>
+                                        <div class="col-9"> <select class="form-control" id="month" name="expmonth">
+                                                <option selected>Month</option>
+                                                <option>January</option>
+                                                <option>February</option>
+                                                <option>March</option>
+                                                <option>April</option>
+                                                <option>May</option>
+                                                <option>June</option>
+                                                <option>July</option>
+                                                <option>August</option>
+                                                <option>September</option>
+                                                <option>October</option>
+                                                <option>November</option>
+                                                <option>December</option>
+                                            </select> <select class="form-control" id="year" name="expyear">
+                                                <option selected>Year</option>
+                                            </select> </div>
+                                    </div>
             <button type="submit" class="btn btn-primary">Submit</button>
       </form>
         </div>
