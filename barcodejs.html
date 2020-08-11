@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Barcode generator</title>
+</head>
+<body>
+	<h1>Barcode generator</h1>
+	<button onclick="codeOnBlur(this)">Generate</button>
+<script type="text/javascript">
+	function codeOnBlur(barcode) {
+
+    var barcodeLengthArr = [8, 12, 13, 14];
+    var allowedChars = new RegExp(/\d{8,14}/); // >7 & <15
+    // put numbers in array and convert to type Int.
+    var barcodeArray = barcode.split('');
+    for( var i = 0; i < barcodeArray.length; i++) {
+        barcodeArray[i] = parseInt(barcodeArray[i], 10);
+    }
+    // get the last digit for checking later
+    var checkDigit = barcodeArray.slice(-1)[0];
+    // we'll need a to compare it to this:
+    var remainder = 0;
+
+    // check if input (barcode) is in the array and check against the regex. 
+    if (($.inArray(barcode.length, barcodeLengthArr) > -1) && (allowedChars.test(barcode))) {
+        console.log("barcodeArray ", barcodeArray, " :: checkDigit ", checkDigit);
+
+        // Pop the last item from the barcode array, test if the length is 
+        // odd or even (see note on calculating the check digit) and 
+        // multiply each item in array based in position: 
+ 
+        var total = 0;
+        barcodeArray.pop();
+        // odd length after pop
+        if (barcodeArray.length % 2 === 1) {
+            for (var i = barcodeArray.length - 1; i >= 0; i--) {
+                barcodeArray[i] = i % 2 === 0 ? barcodeArray[i] * 3 : barcodeArray[i] * 1;
+                total += barcodeArray[i];
+            }
+        // even length after pop
+        } else if (barcodeArray.length % 2 === 0) {
+
+            for (var i = barcodeArray.length - 1; i >= 0; i--) {
+                barcodeArray[i] = i % 2 === 0 ? barcodeArray[i] * 1 : barcodeArray[i] * 3;
+                total += barcodeArray[i];
+            }
+        } else {
+            // validation passed = false
+        }
+        // calculate the remainder of totalrounded up to nearest multiple of 10:
+        remainder = (Math.ceil((total + 1) / 10) * 10) - total;
+        console.log("loop total = ", total, ", remainder: ", remainder);
+
+        if ( remainder === checkDigit ) {
+            //validation passed = true;
+            return;
+        } else {
+              //validation passed = false; 
+        }
+
+    } else {
+        //validation Passed = false;
+    }
+}
+</script>
+</body>
+</html>

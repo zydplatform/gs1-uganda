@@ -1,3 +1,23 @@
+<?php 
+require_once '../config.php';
+session_start();
+
+  if (!isset($_SESSION['username'])) {
+    $_SESSION['msg'] = "You must log in first";
+    header('location: ../login.php');
+  }
+
+  if (isset($_GET['logout'])) {
+    session_destroy();
+    unset($_SESSION['username']);
+    header("location: ../login.php");
+  }
+  include 'products.php';
+
+  $sqltable = "SELECT * FROM products";
+  $resulttable =mysqli_query($connect_database, $sqltable);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -20,7 +40,15 @@
   <link href="css/userdashboard.css" rel="stylesheet">
   <!-- data tables custom styles -->
    <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
-
+   <style type="text/css">
+     .sidebar{
+      /*background: white;*/
+      /*color: black;*/
+     }
+     body#page-top{
+      top: 0px;
+     }
+   </style>
 </head>
 
 <body id="page-top">
@@ -32,7 +60,7 @@
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
       <!-- Sidebar - Brand -->
-      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="../../index.php">
         <div class="sidebar-brand-icon rotate-n-0">
           <img src="images/newlogo1.png" alt="gs1-logo" style="width: 80px;height: 60px;">
         </div>
@@ -44,7 +72,7 @@
 
       <!-- Nav Item - Dashboard -->
       <li class="nav-item active">
-        <a class="nav-link" href="index.html">
+        <a class="nav-link" href="../../index.php">
           <i class="fas fa-fw fa-tachometer-alt"></i>
           <span>Dashboard</span></a>
       </li>
@@ -57,7 +85,7 @@
       <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
           <i class="fas fa-fw fa-cog"></i>
-          <span>Generate Barcode</span>
+          <span>Barcodes</span>
         </a>
         <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
@@ -93,7 +121,7 @@
         <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
             <a class="collapse-item" href="#">List of all Products</a>
-            <a class="collapse-item" href="#">Product Barcode Range</a>
+            <a class="collapse-item" data-toggle="modal" data-target="#productModal">Add Product</a>
             <a class="collapse-item" href="#">Products registered</a>
             <a class="collapse-item" href="#">Products Unregistered</a>
           </div>
@@ -129,7 +157,7 @@
           </button>
 
           <!-- Topbar Search -->
-          <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+<!--           <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
             <div class="input-group">
               <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
               <div class="input-group-append">
@@ -138,30 +166,14 @@
                 </button>
               </div>
             </div>
-          </form>
-
-          <!-- Topbar Navbar -->
+          </form> -->
+          <div style="height: 100px; text-align: center;font-weight: bold;margin-top: 50px;">
+           <h3>Welcome to GS1 Uganda  Dashboard  <?php echo ucfirst($_SESSION['username']); ?> </h3>
+          </div>
+            <!-- Topbar Navbar -->
           <ul class="navbar-nav ml-auto">
 
             <!-- Nav Item - Search Dropdown (Visible Only XS) -->
-            <li class="nav-item dropdown no-arrow d-sm-none">
-              <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-search fa-fw"></i>
-              </a>
-              <!-- Dropdown - Messages -->
-              <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in" aria-labelledby="searchDropdown">
-                <form class="form-inline mr-auto w-100 navbar-search">
-                  <div class="input-group">
-                    <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
-                    <div class="input-group-append">
-                      <button class="btn btn-primary" type="button">
-                        <i class="fas fa-search fa-sm"></i>
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </li>
 
             <!-- Nav Item - Alerts -->
             
@@ -170,8 +182,8 @@
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Coca Cola</span>
-                <img class="img-profile rounded-circle" src="images/cocacola.png" alt="company-logo">
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?php echo ucfirst($_SESSION['username']); ?></span>
+                <!-- <img class="img-profile rounded-circle" src="images/cocacola.png" alt="company-logo"> -->
               </a>
               <!-- Dropdown - User Information -->
               <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
@@ -206,7 +218,8 @@
           <!-- Page Heading -->
           <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+             <span class="fa fa-user">Membership No : <?php echo ucfirst($_SESSION['membershipno']); ?></span>
+<!--             <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a> -->
           </div>
 
           <!-- Content Row -->
@@ -218,7 +231,7 @@
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Barcodes (Annually)</div>
+                      <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">My Barcodes (Annually)</div>
                       <div class="h5 mb-0 font-weight-bold text-gray-800">40,000</div>
                     </div>
                     <div class="col-auto">
@@ -235,7 +248,7 @@
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Products Registered (Annual)</div>
+                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">My Products </div>
                       <div class="h5 mb-0 font-weight-bold text-gray-800">215,000,000</div>
                     </div>
                     <div class="col-auto">
@@ -371,89 +384,50 @@
             <div class="card-body">
 
               <div class="table-responsive">
-                <button class="btn btn-info">Add Product</button><br><br>
+                <!-- <button class="btn btn-info">Add Product</button><br><br> -->
+                <?php if(mysqli_num_rows($resulttable)>0){ ?>
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                   <thead>
                     <tr>
                       <th>Product Name</th>
-                      <th>No. of Products</th>
-                      <th>Product Cost</th>
-                      <th>No. of Barcodes</th>
-                      <th>Barcodes-Issued Date</th>
-                      <th>Barcodes-Expiry Date</th>
+                      <th>Product Price</th>
+                      <th>Product Details</th>
+                      <th>Product MFG (manufactured date)</th>
+                      <th>Product EXP (expiry date)</th>
+                      <th>Product Quantity</th>
                     </tr>
                   </thead>
-                  <tfoot>
-                    <tr>
-                      <th>Product Name</th>
-                      <th>No. of Products</th>
-                      <th>Product Cost (ugshs)</th>
-                      <th>No. of Barcodes</th>
-                      <th>Barcodes-Issued Date</th>
-                      <th>Barcodes-Expiry Date</th>
-                    </tr>
-                  </tfoot>
+
                   <tbody>
+
+                    <?php 
+                      $i=0;
+                      while($row= mysqli_fetch_array($resulttable)){
+
+
+                     ?>
                     <tr>
-                      <td>Coke Soda</td>
-                      <td>100</td>
-                      <td>300</td>
-                      <td>10</td>
-                      <td>2011/04/25</td>
-                      <td>2020/04/25</td>
+                      <td><?php echo $row['productname']; ?></td>
+                      <td><?php echo $row['productprice']; ?></td>
+                      <td><?php echo $row['productspecification']; ?></td>
+                      <td><?php echo $row['mfgdate']; ?></td>
+                      <td><?php echo $row['expdate']; ?></td>
+                      <td><?php echo $row['productqty']; ?></td>
                     </tr>
-                    <tr>
-                      <td>Coke Soda</td>
-                      <td>100</td>
-                      <td>300</td>
-                      <td>10</td>
-                      <td>2011/04/25</td>
-                      <td>2020/04/25</td>
-                    </tr>
-                    <tr>
-                      <td>Fanta Soda</td>
-                      <td>100</td>
-                      <td>300</td>
-                      <td>10</td>
-                      <td>2011/04/25</td>
-                      <td>2020/04/25</td>
-                    </tr>
-                    <tr>
-                      <td>Fanta Soda</td>
-                      <td>100</td>
-                      <td>300</td>
-                      <td>10</td>
-                      <td>2011/04/25</td>
-                      <td>2020/04/25</td>
-                    </tr>
-                    <tr>
-                      <td>Coke Soda</td>
-                      <td>100</td>
-                      <td>300</td>
-                      <td>10</td>
-                      <td>2011/04/25</td>
-                      <td>2020/04/25</td>
-                    </tr>
-                    <tr>
-                      <td>Fanta Soda</td>
-                      <td>100</td>
-                      <td>300</td>
-                      <td>10</td>
-                      <td>2011/04/25</td>
-                      <td>2020/04/25</td>
-                    </tr>
-                    <tr>
-                      <td>Coke Soda</td>
-                      <td>100</td>
-                      <td>300</td>
-                      <td>10</td>
-                      <td>2011/04/25</td>
-                      <td>2020/04/25</td>
-                    </tr>
-              
-                  </tbody>
-                </table>
-              </div>
+                    <?php 
+                      $i++;
+                    }
+                     ?>
+                   </tbody>
+                 </table>
+                 <?php 
+
+                  }
+                  else{
+                    echo "No result found";
+                  }
+                  ?>
+                                 </div>
             </div>
           </div>
 
@@ -491,7 +465,7 @@
         <div class="modal-body" style="color: rgba(255,10,51,1);">Select "Logout" below if you are ready to end your current session.</div>
         <div class="modal-footer">
           <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-          <a class="btn btn-primary" href="../../index.html">Logout</a>
+          <a class="btn btn-md btn-danger" href="../login.php" name="logout">Logout</a>
         </div>
       </div>
     </div>
@@ -537,7 +511,108 @@
         </div> -->
       </div>
     </div>
-  </div>
+
+      <!-- product modal -->
+  <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Register Your Product </h5>
+          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+          <div class="alert alert-success alert-dismissible" id="success" style="display:none;">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+         </div>
+          <form id="prodform" method="POST">
+            <div class="form-group">
+              <label for="pname">Product Name</label>
+              <input type="text" class="form-control" id="pname" name="pname" aria-describedby="pname" placeholder="Enter product name" required>
+<!--               <span class="help-block" style="color: rgba(255,10,51,1);"><?php echo $pname_error; ?></span> -->
+            </div>
+            <div class="form-group">
+              <label for="pprice">Product Price</label>
+              <input type="number" class="form-control" id="pprice" name="pprice">
+<!--               <span class="help-block" style="color: rgba(255,10,51,1);"><?php echo $pprice_error; ?></span> -->
+            </div>
+            <div class="form-group">
+              <label for="pdetails">Product Details</label>
+              <input type="text" class="form-control" name="pdetails" id="pdetails" aria-describedby="rate" placeholder="product details eg: weight,size" required>
+<!--               <span class="help-block" style="color: rgba(255,10,51,1);"><?php echo $pdetails_error; ?></span> -->
+            </div>
+            <div class="form-group">
+              <label for="qty">Product Quantity </label>
+              <input type="number" class="form-control" id="qty" name="qty" placeholder="Number of items" required>
+<!--               <span class="help-block" style="color: rgba(255,10,51,1);"><?php echo $qty_error; ?></span> -->
+            </div>
+            <div class="form-group">
+              <label for="mfg">Product MFG </label>
+              <input type="date" class="form-control" id="mfg" name="mfg" placeholder="date manufactured" required>
+<!--               <span class="help-block" style="color: rgba(255,10,51,1);"><?php echo $mfgdate_error; ?></span> -->
+            </div>
+            <div class="form-group">
+              <label for="exp">Product EXP </label>
+              <input type="date" class="form-control" id="exp" name="exp" placeholder="expiry date" required>
+<!--               <span class="help-block" style="color: rgba(255,10,51,1);"><?php echo $expdate_error; ?></span> -->
+            </div>
+
+            <button title="addproduct" type="submit" id="addproduct" name="addproduct" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+        </div>
+
+
+<script>
+$(document).ready(function() {
+  $('#addproduct').('submit', function(e) {
+    e.preventDefault();
+    debugger
+    
+    $("#addproduct").attr("disabled", "disabled");
+    var pname = $('#pname').val();
+    var pprice = $('#ppricel').val();
+    var pdetails = $('#pdetails').val();
+    var qty = $('#qty').val();
+    var mfg = $('#mfg').val();
+    var exp = $('#exp').val();
+    if(pname!="" && pprice!="" && pdetails!="" && qty!="" && mfg != "" && exp!=""){
+      $.ajax({
+
+        url: "products.php",
+        type: "POST",
+        data: $(this).serializer(),
+        cache: false,
+        success: function(dataResult){
+          var dataResult = JSON.parse(dataResult);
+          if(dataResult.statusCode==200){
+            $("#addproduct").removeAttr("disabled");
+            $('#prodform').find('input:text').val('');
+            $("#success").show();
+            $('#success').html('Data added successfully !');            
+          }
+          else if(dataResult.statusCode==201){
+             alert("Error occured !");
+          }
+          
+        }
+      });
+    }
+    else{
+      alert('Please fill all the field !');
+    }
+  });
+});
+</script>
+
+<!--         <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+          <a class="btn btn-primary" href="../../index.html">Logout</a>
+        </div> -->
+      </div>
+    </div>
   <!-- Footer -->
       <footer class="sticky-footer bg-white" style="bottom: 0px;">
         <div class="">
@@ -548,8 +623,6 @@
           </div>
         </div>
       </footer>
-      <!-- End of Footer -->
-
 
   <!-- Bootstrap core JavaScript-->
   <script src="vendor/jquery/jquery.min.js"></script>
